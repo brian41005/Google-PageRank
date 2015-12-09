@@ -42,7 +42,7 @@ def FindEigenvector(A):
 
     while True:
         
-        if not numpy.allclose(temp,A*temp,):
+        if not numpy.allclose(temp,A*temp):
             temp=A*temp
             i+=1
         else:
