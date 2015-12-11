@@ -8,25 +8,45 @@ from bs4 import BeautifulSoup
 import numpy as np
 import numpy.matlib
 from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
 from urllib.parse import urljoin
-import re
 import eigenvector
 #------------------------------------------------------------------------------
-num = 20
+num = 100
 row =num
 col = num
 links = []
 A = np.matlib.zeros((row,col),dtype=np.float64)
 #------------------------------------------------------------------------------
+def Rank(A):
+    global links
+    mydict = []
+    for i in range(0,len(links)):
+        mydict.append([A[i,0],links[i]])
+    mydict.sort(reverse=True)
+    return mydict
+#------------------------------------------------------------------------------
+def GetTitle(url):
+    try:
+         html_page = urlopen(url)
+         soup = BeautifulSoup(html_page, "lxml")
+         return soup.title.string
+    except:
+        return "ERROR"
+#------------------------------------------------------------------------------
 def FindIndex(url, links):
-    return int(links.index(url))
+     return int(links.index(url))
 #-------------------------------------------------------------------------------
 def IsInTheList(url, links):
+    if url in links:
+        return True
+    else:
+        return False
+    '''
     for i in links:
         if url == i:
             return True
     return False
+    '''
 #------------------------------------------------------------------------------
 def Is_ntut_web(link):
     if link.find("http://www.ntut.edu.tw") >= 0:
@@ -37,6 +57,7 @@ def MyParser(url,index):
     global links,A,num
     if (not IsInTheList(url, links)) and (len(links) <= num):
         try:
+            #url = urljoin("www.ntut.edu.tw",url)
             html_page = urlopen(url)
             soup = BeautifulSoup(html_page, "lxml")
             meta = str(soup.html.head.meta)
@@ -48,22 +69,27 @@ def MyParser(url,index):
                     if Is_ntut_web(tempUrl):
                         print("進入%s"%(tempUrl))
                         MyParser(tempUrl,FindIndex(url,links))
-            #else:
-                #print(meta)
+                        if index != FindIndex(url,links):
+                            A[FindIndex(url,links),index]=1
         except:
             pass
     elif IsInTheList(url, links) and (len(links) <= num+1):
         if index != FindIndex(url,links):
-            print("(%d:%d)"%(FindIndex(url,links),index))
+            #print("(%d:%d)"%(FindIndex(url,links),index))
             A[FindIndex(url,links),index]=1
             #print(A[FindIndex(url,links),index])
 #------------------------------------------------------------------------------
 if __name__=="__main__":
-    MyParser("http://www.ntut.edu.tw/files/17-1021.php",0)
+    MyParser("http://www.ntut.edu.tw/bin/home.php",0)
     print("[over]\n-------------------------------------")
-    for url in links:
-        print(url)
+    links.pop()
+    #for url in links:
+        #print(url)
     eigenvector.ShowMatrix(A)
-    eigenvector.ShowMatrix(eigenvector.FindEigenvector(A))
+    finalA = eigenvector.FindEigenvector(A)
+    eigenvector.ShowMatrix(finalA)
+    mydict = Rank(finalA)
+    for key,value in mydict:
+        print("%.6f: %s %s"%(key, ("["+GetTitle(value)+"]"),value))
 #-------------------------------------------------------------------------------
-#python c:\EM_PJ\HtmlGetLink.py
+# python c:\EM_PJ\HtmlGetLink.py
