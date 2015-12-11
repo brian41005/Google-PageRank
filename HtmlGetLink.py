@@ -12,11 +12,22 @@ from urllib.parse import urljoin
 import eigenvector
 #------------------------------------------------------------------------------
 num = 100
-num-=1
-row =num
-col = num
 links = ['http://www.ntut.edu.tw']
-A = np.matlib.zeros((row,col),dtype=np.float64)
+A = np.matlib.zeros((num,num),dtype=np.float64)
+
+#------------------------------------------------------------------------------
+def Refresh(A):
+    global num,links
+    temp = num
+    if num > len(links):
+        h = num- len(links)
+        for i in range(h):
+            A = np.delete(A, np.s_[temp-1], 1)
+            A =np.delete(A, temp-1, 0)
+            temp-=1
+        return A
+    else:
+        return A
 #------------------------------------------------------------------------------
 def Rank(A):
     global links
@@ -50,9 +61,9 @@ def IsInTheList(url, links):
     '''
 #------------------------------------------------------------------------------
 def IsWeb(link):
-    if len(link) > 150:
+    if len(link) > 100:
         return False
-    mylist = ['.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com'] 
+    mylist = ['.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com','.rar','.zip','.flv'] 
     for key in mylist:
         if link.find(key) >=0:
             return False
@@ -60,6 +71,7 @@ def IsWeb(link):
 #------------------------------------------------------------------------------
 def Is_ntut_web(link):
     if link.find("http://www.ntut.edu.tw") >= 0 and IsWeb(link):
+    #if link.find("http://www.")>=0 and link.find(".ntut.edu.tw") >= 0 and IsWeb(link):
         return True
     return False
 #------------------------------------------------------------------------------
@@ -94,13 +106,16 @@ if __name__=="__main__":
     links.pop()
     #for url in links:
         #print(url)
+    #print(A.shape)
+    A = Refresh(A)
+    #print(A.shape)
     eigenvector.ShowMatrix(A)
     finalA = eigenvector.FindEigenvector(A)
     eigenvector.ShowMatrix(finalA)
     mydict = Rank(finalA)
     i = 1
     for key,value in mydict:
-        print("No.%3d[%.6f] %s %s"%(i,key, ("["+GetTitle(value)+"]"),value))
+        print("No.%-3d [%.6f] %s %s"%(i,key, ("["+GetTitle(value)+"]"),value))
         i+=1
 #-------------------------------------------------------------------------------
 # python c:\EM_PJ\HtmlGetLink.py
