@@ -12,9 +12,10 @@ from urllib.parse import urljoin
 import eigenvector
 #------------------------------------------------------------------------------
 num = 100
+num-=1
 row =num
 col = num
-links = []
+links = ['http://www.ntut.edu.tw']
 A = np.matlib.zeros((row,col),dtype=np.float64)
 #------------------------------------------------------------------------------
 def Rank(A):
@@ -29,9 +30,9 @@ def GetTitle(url):
     try:
          html_page = urlopen(url)
          soup = BeautifulSoup(html_page, "lxml")
-         return soup.title.string
+         return str(soup.title.string)
     except:
-        return "ERROR"
+        return ""
 #------------------------------------------------------------------------------
 def FindIndex(url, links):
      return int(links.index(url))
@@ -48,8 +49,17 @@ def IsInTheList(url, links):
     return False
     '''
 #------------------------------------------------------------------------------
+def IsWeb(link):
+    if len(link) > 150:
+        return False
+    mylist = ['.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com'] 
+    for key in mylist:
+        if link.find(key) >=0:
+            return False
+    return True
+#------------------------------------------------------------------------------
 def Is_ntut_web(link):
-    if link.find("http://www.ntut.edu.tw") >= 0:
+    if link.find("http://www.ntut.edu.tw") >= 0 and IsWeb(link):
         return True
     return False
 #------------------------------------------------------------------------------
@@ -57,7 +67,6 @@ def MyParser(url,index):
     global links,A,num
     if (not IsInTheList(url, links)) and (len(links) <= num):
         try:
-            #url = urljoin("www.ntut.edu.tw",url)
             html_page = urlopen(url)
             soup = BeautifulSoup(html_page, "lxml")
             meta = str(soup.html.head.meta)
@@ -89,7 +98,9 @@ if __name__=="__main__":
     finalA = eigenvector.FindEigenvector(A)
     eigenvector.ShowMatrix(finalA)
     mydict = Rank(finalA)
+    i = 1
     for key,value in mydict:
-        print("%.6f: %s %s"%(key, ("["+GetTitle(value)+"]"),value))
+        print("No.%3d[%.6f] %s %s"%(i,key, ("["+GetTitle(value)+"]"),value))
+        i+=1
 #-------------------------------------------------------------------------------
 # python c:\EM_PJ\HtmlGetLink.py
