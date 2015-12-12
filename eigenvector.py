@@ -49,14 +49,17 @@ def FindEigenvector(A):
             break
     return temp
 #------------------------------------
-def ShowMatrix(A):
+def ShowMatrix(A,key):
     row , col = A.shape
     for i in range(100): 
         print("_",end="")
     print()
     for i in range(row):
         for j in range(col):
-            print("%.4f "%(A[i,j]),end =" ")
+            if key=='f':
+                print("%.4f"%(A[i,j]),end =" ")
+            else:
+                print("%d"%(A[i,j]),end =" ")
         print()
     for i in range(100): 
         print("_",end="")
@@ -73,6 +76,9 @@ if __name__=="__main__":
                  [0,0,0,0,1,1,1,0]
                  ],dtype=np.float64)  
                  
-    ShowMatrix(FindEigenvector(A))
+    ShowMatrix(FindEigenvector(A),'f')
+'''
+
+'''
 
     

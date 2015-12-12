@@ -12,9 +12,8 @@ from urllib.parse import urljoin
 import eigenvector
 #------------------------------------------------------------------------------
 num = 100
-links = ['http://www.ntut.edu.tw']
+links = []
 A = np.matlib.zeros((num,num),dtype=np.float64)
-
 #------------------------------------------------------------------------------
 def Refresh(A):
     global num,links
@@ -70,48 +69,46 @@ def IsWeb(link):
     return True
 #------------------------------------------------------------------------------
 def Is_ntut_web(link):
-    if link.find("http://www.ntut.edu.tw") >= 0 and IsWeb(link):
+    if (link.find("http://www.ntut.edu.tw") >= 0) and IsWeb(link):
     #if link.find("http://www.")>=0 and link.find(".ntut.edu.tw") >= 0 and IsWeb(link):
         return True
     return False
 #------------------------------------------------------------------------------
 def MyParser(url,index):
     global links,A,num
-    if (not IsInTheList(url, links)) and (len(links) <= num):
+    if (not IsInTheList(url, links)) and (len(links) <= num) and Is_ntut_web(url):
         try:
-            html_page = urlopen(url)
-            soup = BeautifulSoup(html_page, "lxml")
+            soup = BeautifulSoup(urlopen(url), "lxml")
             meta = str(soup.html.head.meta)
             if meta.find('text/html;') >= 0:
                 links.append(url)
                 for link in soup.findAll('a'):
+                    #print(A[:,0])
                     tempUrl = link.get('href')
                     tempUrl = urljoin("http://www.ntut.edu.tw",tempUrl)
-                    if Is_ntut_web(tempUrl):
-                        print("進入%s"%(tempUrl))
-                        MyParser(tempUrl,FindIndex(url,links))
-                        if index != FindIndex(url,links):
-                            A[FindIndex(url,links),index]=1
+                    MyParser(tempUrl,FindIndex(url,links))
+                    if index != FindIndex(url,links):
+                        A[FindIndex(url,links),index]=1
         except:
             pass
     elif IsInTheList(url, links) and (len(links) <= num+1):
         if index != FindIndex(url,links):
-            #print("(%d:%d)"%(FindIndex(url,links),index))
             A[FindIndex(url,links),index]=1
-            #print(A[FindIndex(url,links),index])
 #------------------------------------------------------------------------------
 if __name__=="__main__":
-    MyParser("http://www.ntut.edu.tw/bin/home.php",0)
+    MyParser("http://www.ntut.edu.tw/files/11-1021-5787.php#t1",0)
     print("[over]\n-------------------------------------")
     links.pop()
-    #for url in links:
-        #print(url)
-    #print(A.shape)
+    print(A.shape)
     A = Refresh(A)
-    #print(A.shape)
-    eigenvector.ShowMatrix(A)
+    print(A.shape)
+    print(len(links))
+    eigenvector.ShowMatrix(A,'i')
     finalA = eigenvector.FindEigenvector(A)
-    eigenvector.ShowMatrix(finalA)
+    #eigenvector.ShowMatrix(finalA,'f')
+    for i in range(len(links)):
+        print("No.%-3d [%.6f] %s %s"%(i+1,finalA[i,0], ("["+GetTitle(links[i])+"]"),links[i]))
+    print("---------------------------------------------------------------------------")
     mydict = Rank(finalA)
     i = 1
     for key,value in mydict:
