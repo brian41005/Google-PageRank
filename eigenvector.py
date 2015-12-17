@@ -30,11 +30,20 @@ def ProcessMatrix(A):
                 A[i,j] = 1/outputLink[j]
     G=0.85*A+(0.15)*(1/row)*1
     
-    return G
+    return A
 #--------------------------------------
 def FindEigenvector(A):
     tempA= A.copy()
-    tempA = ProcessMatrix(tempA)
+    e_vals, e_vecs = LA.eig(ProcessMatrix(tempA))  
+    e_vals = np.absolute(e_vals)
+    e_vecs = np.absolute(e_vecs)
+    for i in range(len(e_vals)):
+        if numpy.allclose(e_vals[i],1.0):
+            mysum = 0.0
+            for j in e_vecs[:,i]:
+                mysum+=j
+            return e_vecs[:,i]/mysum
+    '''
     row ,col =tempA.shape
     initialnum = 1/row
     v= [[initialnum]]
@@ -53,6 +62,7 @@ def FindEigenvector(A):
     #G=0.85*A+(0.15)*(1/row)*1
     #temp= G*temp
     return temp
+    '''
 #------------------------------------
 def ShowMatrix(A,key):
     row , col = A.shape
@@ -79,11 +89,10 @@ if __name__=="__main__":
                  [0,0,0,1,1,0,0,1],
                  [0,0,0,0,1,0,0,1],
                  [0,0,0,0,1,1,1,0]
-                 ],dtype=np.float64)  
-    #e_vals, e_vecs = LA.eig(ProcessMatrix(A))  
-    #print(e_vecs)          
-    ShowMatrix(FindEigenvector(A),'f')
-    ShowMatrix(A,'f')
+                 ],dtype=np.float64) 
+    finalA = FindEigenvector(A)
+    ShowMatrix(finalA,'f')
+    #ShowMatrix(A,'f')
 '''
 
 '''
