@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Dec  9 21:52:34 2015
-
 @author: Brian Ma
 """
 from bs4 import BeautifulSoup
@@ -10,8 +9,9 @@ import numpy.matlib
 from urllib.request import Request, urlopen
 from urllib.parse import urljoin
 import eigenvector
+import matplotlib.pyplot as plt
 #------------------------------------------------------------------------------
-num = 100
+num = 200
 links = []
 A = np.matlib.zeros((num,num),dtype=np.float64)
 #------------------------------------------------------------------------------
@@ -52,25 +52,19 @@ def IsInTheList(url, links):
         return True
     else:
         return False
-    '''
-    for i in links:
-        if url == i:
-            return True
-    return False
-    '''
 #------------------------------------------------------------------------------
 def IsWeb(link):
     if len(link) > 100:
         return False
-    mylist = ['.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com','.rar','.zip','.flv'] 
+    mylist = ['#','Top','.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com','.rar','.zip','.flv'] 
     for key in mylist:
         if link.find(key) >=0:
             return False
     return True
 #------------------------------------------------------------------------------
 def Is_ntut_web(link):
-    if (link.find("http://www.ntut.edu.tw") >= 0) and IsWeb(link):
-    #if link.find("http://www.")>=0 and link.find(".ntut.edu.tw") >= 0 and IsWeb(link):
+    #if (link.find("http://www.ntut.edu.tw") >= 0) and IsWeb(link):
+    if link.find("http://www.")>=0 and link.find(".ntut.edu.tw") >= 0 and IsWeb(link):
         return True
     return False
 #------------------------------------------------------------------------------
@@ -107,6 +101,11 @@ def MyParser(url,index):
         if index != FindIndex(url,links):
             A[FindIndex(url,links),index]=1
 #------------------------------------------------------------------------------
+def PlottingMatrix(A):
+    plt.ion()
+    plt.matshow(A, vmin=0.001, vmax=0.05) 
+    plt.colorbar()
+#------------------------------------------------------------------------------
 if __name__=="__main__":
     MyParser("http://www.ntut.edu.tw/files/11-1021-5787.php",0)
     print("[over]\n-------------------------------------")
@@ -116,6 +115,8 @@ if __name__=="__main__":
     print(A.shape)
     print(len(links))
     #eigenvector.ShowMatrix(A,'i')
+    PlottingMatrix(eigenvector.ProcessMatrix(A))
+
     finalA = eigenvector.FindEigenvector(A)
     eigenvector.ShowMatrix(finalA,'f')
     for i in range(len(links)):

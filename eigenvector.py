@@ -30,17 +30,16 @@ def ProcessMatrix(A):
                 A[i,j] = 1/outputLink[j]
     ONE = np.ones((row ,col),dtype=np.float64)
     G=alpha*A+((1-alpha)*(1/row)*ONE)#google matrix
-    ShowMatrix(G,'f')
+    #ShowMatrix(G,'f')
     return G
 #--------------------------------------
 def FindEigenvector(A):
     tempA= A.copy()
     tempA = ProcessMatrix(tempA)
-
     e_vals, e_vecs = LA.eig(tempA)  
     e_vals = np.absolute(e_vals)
     e_vecs = np.absolute(e_vecs)
-    #print(e_vals)
+    print(e_vals)
     #print(e_vecs)
     for i in range(len(e_vals)):
         if numpy.allclose(e_vals[i],1.0):
@@ -49,6 +48,10 @@ def FindEigenvector(A):
                 mysum+=j
             return e_vecs[:,i]/mysum
     
+    mysum = 0.0
+    for j in e_vecs[:,0]:
+        mysum+=j
+    return e_vecs[:,0]/mysum
     '''
     row ,col =tempA.shape
     initialnum = 1/row
@@ -84,7 +87,7 @@ def ShowMatrix(A,key):
     print()
 #------------------------------------
 if __name__=="__main__":
-    A=np.matrix([[0,0,0,0,0,0,0,0],
+    A=np.matrix([[0,0,0,0,0,0,1,0],
                  [1,0,1,1,0,0,0,0],
                  [1,0,0,0,0,0,0,0],
                  [0,1,0,0,0,0,0,0],
