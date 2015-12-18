@@ -74,13 +74,25 @@ def Is_ntut_web(link):
         return True
     return False
 #------------------------------------------------------------------------------
+
 def MyParser(url,index):
     global links,A,num
     if (not IsInTheList(url, links)) and (len(links) <= num) and Is_ntut_web(url):
         try:
             soup = BeautifulSoup(urlopen(url), "lxml")
+            result = soup.find("meta",attrs={"http-equiv":"refresh"})
             meta = str(soup.html.head.meta)
-            if meta.find('text/html;') >= 0:
+            if result:
+                links.append(url)
+                wait,text=result["content"].split(";")
+                if text.lower().startswith("url="):
+                    pice=text[4:]
+                    tempUrl = urljoin('http://www.ntut.edu.tw',pice)
+                    print(url)
+                    MyParser(tempUrl,FindIndex(url,links))
+                    if index != FindIndex(url,links):
+                        A[FindIndex(url,links),index]=1
+            elif meta.find('text/html;') >= 0:
                 links.append(url)
                 for link in soup.findAll('a'):
                     #print(A[:,0])
@@ -96,16 +108,16 @@ def MyParser(url,index):
             A[FindIndex(url,links),index]=1
 #------------------------------------------------------------------------------
 if __name__=="__main__":
-    MyParser("http://www.ntut.edu.tw/files/11-1021-5787.php#t1",0)
+    MyParser("http://www.ntut.edu.tw/files/11-1021-5787.php",0)
     print("[over]\n-------------------------------------")
     links.pop()
     print(A.shape)
     A = Refresh(A)
     print(A.shape)
     print(len(links))
-    eigenvector.ShowMatrix(A,'i')
+    #eigenvector.ShowMatrix(A,'i')
     finalA = eigenvector.FindEigenvector(A)
-    #eigenvector.ShowMatrix(finalA,'f')
+    eigenvector.ShowMatrix(finalA,'f')
     for i in range(len(links)):
         print("No.%-3d [%.6f] %s %s"%(i+1,finalA[i,0], ("["+GetTitle(links[i])+"]"),links[i]))
     print("---------------------------------------------------------------------------")
