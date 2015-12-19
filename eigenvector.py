@@ -39,7 +39,7 @@ def FindEigenvector(A):
     e_vals, e_vecs = LA.eig(tempA)  
     e_vals = np.absolute(e_vals)
     e_vecs = np.absolute(e_vecs)
-    print(e_vals)
+    #print(e_vals)
     #print(e_vecs)
     for i in range(len(e_vals)):
         if numpy.allclose(e_vals[i],1.0):

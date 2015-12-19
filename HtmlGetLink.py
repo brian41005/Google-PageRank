@@ -10,8 +10,9 @@ from urllib.request import Request, urlopen
 from urllib.parse import urljoin
 import eigenvector
 import matplotlib.pyplot as plt
+import os
 #------------------------------------------------------------------------------
-num = 200
+num = 100
 links = []
 A = np.matlib.zeros((num,num),dtype=np.float64)
 #------------------------------------------------------------------------------
@@ -32,7 +33,7 @@ def Rank(A):
     global links
     mydict = []
     for i in range(0,len(links)):
-        mydict.append([A[i,0],links[i]])
+        mydict.append([A[i,0],GetTitle(links[i]),links[i]])
     mydict.sort(reverse=True)
     return mydict
 #------------------------------------------------------------------------------
@@ -56,15 +57,15 @@ def IsInTheList(url, links):
 def IsWeb(link):
     if len(link) > 100:
         return False
-    mylist = ['#','Top','.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com','.rar','.zip','.flv'] 
+    mylist = ['U-Tech','#','Top','.pdf','.wmv','.jpg','.mp4','.ppt','.docx','downloadfile','www.plurk.com','.rar','.zip','.flv'] 
     for key in mylist:
         if link.find(key) >=0:
             return False
     return True
 #------------------------------------------------------------------------------
 def Is_ntut_web(link):
-    #if (link.find("http://www.ntut.edu.tw") >= 0) and IsWeb(link):
-    if link.find("http://www.")>=0 and link.find(".ntut.edu.tw") >= 0 and IsWeb(link):
+    if (link.find("http://www.ntut.edu.tw") >= 0) and IsWeb(link):
+    #if link.find("http://www.")>=0 and link.find(".ntut.edu.tw") >= 0 and IsWeb(link):
         return True
     return False
 #------------------------------------------------------------------------------
@@ -103,29 +104,36 @@ def MyParser(url,index):
 #------------------------------------------------------------------------------
 def PlottingMatrix(A):
     plt.ion()
-    plt.matshow(A, vmin=0.001, vmax=0.05) 
+    plt.matshow(A, vmin=0, vmax=0.05) 
     plt.colorbar()
 #------------------------------------------------------------------------------
+def SaveRanks(myDict):
+    try:
+        file = open("PageRanks.txt", "a")
+        i = 1
+        for rank, title, link in myDict:
+            file.write("No.%-3d [%.6f] [%s] %s\n"%(i,rank, title,link))
+            i+=1
+        file.close()
+        print("[Saving is successful]")
+    except FileExistsError as msg:
+        print(msg)
+#------------------------------------------------------------------------------
 if __name__=="__main__":
+    print("================================ START ===============================")
     MyParser("http://www.ntut.edu.tw/files/11-1021-5787.php",0)
-    print("[over]\n-------------------------------------")
     links.pop()
+    print("================================[over]================================")
     print(A.shape)
     A = Refresh(A)
     print(A.shape)
     print(len(links))
     #eigenvector.ShowMatrix(A,'i')
-    PlottingMatrix(eigenvector.ProcessMatrix(A))
-
     finalA = eigenvector.FindEigenvector(A)
-    eigenvector.ShowMatrix(finalA,'f')
-    for i in range(len(links)):
-        print("No.%-3d [%.6f] %s %s"%(i+1,finalA[i,0], ("["+GetTitle(links[i])+"]"),links[i]))
-    print("---------------------------------------------------------------------------")
-    mydict = Rank(finalA)
-    i = 1
-    for key,value in mydict:
-        print("No.%-3d [%.6f] %s %s"%(i,key, ("["+GetTitle(value)+"]"),value))
-        i+=1
+    #eigenvector.ShowMatrix(finalA,'f')
+    myDict = Rank(finalA)
+    SaveRanks(myDict)    
+    PlottingMatrix(eigenvector.ProcessMatrix(A))
+    os.system("PAUSE")
 #-------------------------------------------------------------------------------
 # python c:\EM_PJ\HtmlGetLink.py
